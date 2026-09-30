@@ -54,60 +54,54 @@
   </div>
 
   <script>
-    const canvas = document.getElementById('previewCanvas');
-    const ctx = canvas.getContext('2d');
-    const playBtn = document.getElementById('playBtn');
-    const timeDisplay = document.getElementById('timeDisplay');
-    const genVideoBtn = document.getElementById('genVideoBtn');
+    document.addEventListener('DOMContentLoaded', () => {
+  const canvas = document.querySelector('canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
 
-    let isPlaying = false;
-    let frame = 0;
-    const maxFrames = 300; // 10 seconds at 30 fps
-    let animationId = null;
+  let frame = 0;
+  let isPlaying = true;
 
-    function draw() {
-      // Background
-      ctx.fillStyle = '#0f172a';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+  function render() {
+    const w = canvas.width;
+    const h = canvas.height;
 
-      // Animated dynamic frame representation
-      const x = (frame * 3) % canvas.width;
-      ctx.fillStyle = '#38bdf8';
-      ctx.beginPath();
-      ctx.arc(x, 360, 40, 0, Math.PI * 2);
-      ctx.fill();
+    // Clear background
+    ctx.fillStyle = '#0b1120';
+    ctx.fillRect(0, 0, w, h);
 
-      // Overlay text preview
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 36px system-ui';
-      ctx.fillText(`AI Render Frame: ${frame}`, 100, 100);
+    // Animated ball
+    const x = (frame * 3) % w;
+    const y = h / 2 + Math.sin(frame * 0.05) * 40;
 
-      // Timecode
-      const seconds = Math.floor(frame / 30).toString().padStart(2, '0');
-      timeDisplay.textContent = `00:${seconds} / 00:10`;
+    ctx.beginPath();
+    ctx.arc(x, y, 30, 0, Math.PI * 2);
+    ctx.fillStyle = '#38bdf8';
+    ctx.fill();
+
+    // Text Overlay
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 36px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`AI Render Frame: ${frame}`, w / 2, h / 2);
+
+    if (isPlaying) {
+      frame++;
     }
+    requestAnimationFrame(render);
+  }
 
-    function loop() {
-      if (!isPlaying) return;
-      frame = (frame + 1) % maxFrames;
-      draw();
-      animationId = requestAnimationFrame(loop);
-    }
-
-    playBtn.addEventListener('click', () => {
-      isPlaying = !isPlaying;
-      playBtn.textContent = isPlaying ? 'Pause' : 'Play';
-      if (isPlaying) loop();
-    });
-
-    genVideoBtn.addEventListener('click', () => {
-      alert('AI Generation triggered! Canvas updating dynamic frames...');
+  // Hook up buttons safely
+  const genBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('Generate'));
+  if (genBtn) {
+    genBtn.addEventListener('click', () => {
       frame = 0;
-      draw();
+      isPlaying = true;
     });
+  }
 
-    // Initial render call
-    draw();
+  render();
+});
   </script>
 </body>
 </html>
