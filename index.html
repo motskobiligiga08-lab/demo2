@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Studio Cut</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: #f8fafc; height: 100vh; display: flex; flex-direction: column; }
+    header { background: #1e293b; padding: 1rem 1.5rem; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
+    .main-container { display: flex; flex: 1; overflow: hidden; }
+    .sidebar { width: 320px; background: #1e293b; border-right: 1px solid #334155; padding: 1.25rem; overflow-y: auto; }
+    .preview-section { flex: 1; display: flex; flex-direction: column; background: #020617; position: relative; }
+    .canvas-wrapper { flex: 1; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+    canvas { background: #0f172a; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-width: 100%; max-height: 100%; }
+    .controls { background: #1e293b; padding: 1rem; border-top: 1px solid #334155; display: flex; justify-content: center; gap: 1rem; align-items: center; }
+    button { background: #2563eb; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    button:hover { background: #1d4ed8; }
+    .btn-ai { background: linear-gradient(135deg, #a855f7, #6366f1); }
+    .btn-ai:hover { opacity: 0.9; }
+    .timeline { height: 180px; background: #0f172a; border-top: 1px solid #334155; padding: 1rem; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h2>AI Studio Cut</h2>
+    <button class="btn-ai" id="exportBtn">Export Video</button>
+  </header>
+
+  <div class="main-container">
+    <div class="sidebar">
+      <h3>AI Tools</h3>
+      <br>
+      <button class="btn-ai" id="genVideoBtn" style="width: 100%;">Generate AI Scene</button>
+      <br><br>
+      <button id="addCaptionBtn" style="width: 100%;">Auto Captions (Whisper)</button>
+    </div>
+
+    <div class="preview-section">
+      <div class="canvas-wrapper">
+        <canvas id="previewCanvas" width="1280" height="720"></canvas>
+      </div>
+
+      <div class="controls">
+        <button id="playBtn">Play / Pause</button>
+        <span id="timeDisplay">00:00 / 00:10</span>
+      </div>
+
+      <div class="timeline">
+        <p style="font-size: 0.85rem; color: #94a3b8;">Timeline Track V1</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('previewCanvas');
+    const ctx = canvas.getContext('2d');
+    const playBtn = document.getElementById('playBtn');
+    const timeDisplay = document.getElementById('timeDisplay');
+    const genVideoBtn = document.getElementById('genVideoBtn');
+
+    let isPlaying = false;
+    let frame = 0;
+    const maxFrames = 300; // 10 seconds at 30 fps
+    let animationId = null;
+
+    function draw() {
+      // Background
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Animated dynamic frame representation
+      const x = (frame * 3) % canvas.width;
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.arc(x, 360, 40, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Overlay text preview
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 36px system-ui';
+      ctx.fillText(`AI Render Frame: ${frame}`, 100, 100);
+
+      // Timecode
+      const seconds = Math.floor(frame / 30).toString().padStart(2, '0');
+      timeDisplay.textContent = `00:${seconds} / 00:10`;
+    }
+
+    function loop() {
+      if (!isPlaying) return;
+      frame = (frame + 1) % maxFrames;
+      draw();
+      animationId = requestAnimationFrame(loop);
+    }
+
+    playBtn.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      playBtn.textContent = isPlaying ? 'Pause' : 'Play';
+      if (isPlaying) loop();
+    });
+
+    genVideoBtn.addEventListener('click', () => {
+      alert('AI Generation triggered! Canvas updating dynamic frames...');
+      frame = 0;
+      draw();
+    });
+
+    // Initial render call
+    draw();
+  </script>
+</body>
+</html>
